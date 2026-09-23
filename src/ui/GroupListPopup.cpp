@@ -42,13 +42,14 @@ bool GroupListPopup::initPopup() {
 void GroupListPopup::refresh() {
     auto& gm = GroupManager::get();
 
-    if (GroupManager::isOnline()) {
+    if (auto reason = GroupManager::offlineReason()) {
+        m_status->setString(reason->c_str());
+        m_status->setColor({255, 110, 110});
+    } else {
         m_status->setString("Connected to Globed");
         m_status->setColor({120, 255, 120});
-    } else {
-        m_status->setString("Not connected to Globed");
-        m_status->setColor({255, 110, 110});
     }
+    m_status->limitLabelWidth(330.f, 0.35f, 0.15f);
 
     auto content = m_list->m_contentLayer;
     content->removeAllChildren();

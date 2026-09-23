@@ -123,8 +123,8 @@ void GroupChatPopup::refresh() {
 
     gm.markRead(m_groupId);
 
-    if (!GroupManager::isOnline()) {
-        m_status->setString("Not connected to Globed - messages can't be sent");
+    if (auto reason = GroupManager::offlineReason()) {
+        m_status->setString(reason->c_str());
         m_status->setColor({255, 110, 110});
     } else if (globed::api::room::isInRoom()) {
         m_status->setString("In a Globed room: only members in this room will get messages");
@@ -132,6 +132,7 @@ void GroupChatPopup::refresh() {
     } else {
         m_status->setString("");
     }
+    m_status->limitLabelWidth(390.f, 0.55f, 0.2f);
 
     auto content = m_list->m_contentLayer;
     content->removeAllChildren();

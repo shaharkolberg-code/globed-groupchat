@@ -53,7 +53,20 @@ std::string GroupManager::selfName() {
 }
 
 bool GroupManager::isOnline() {
-    return globed::api::available() && globed::api::net::isConnected();
+    return !offlineReason().has_value();
+}
+
+std::optional<std::string> GroupManager::offlineReason() {
+    if (!globed::api::available()) {
+        // Globed v2.2.2 shipped without its API exported (fixed in v2.2.3)
+        auto mod = Loader::get()->getInstalledMod("dankmeme.globed2");
+        auto version = mod ? mod->getVersion().toVString() : std::string("?");
+        return fmt::format("Globed {} has a bug that blocks other mods. Update Globed to v2.2.3 or newer.", version);
+    }
+    if (!globed::api::net::isConnected()) {
+        return "Not connected to Globed";
+    }
+    return std::nullopt;
 }
 
 void GroupManager::ensureLoaded() {
@@ -134,7 +147,7 @@ Result<> GroupManager::addMember(uint64_t groupId, int accountId, std::string us
     if (g->owner != selfId()) return Err("Only the group owner can add members");
     if (g->hasMember(accountId)) return Err("They're already in this group");
     if (g->members.size() >= MAX_MEMBERS) return Err(fmt::format("Groups are limited to {} members", MAX_MEMBERS));
-    if (!isOnline()) return Err("Connect to Globed first");
+    if (auto reason = offlineReason()) return Err(*reason);
 
     g->members.push_back({accountId, sanitize(username, MAX_USERNAME)});
     this->sendSync(*g);
@@ -148,7 +161,7 @@ Result<> GroupManager::kickMember(uint64_t groupId, int accountId) {
     if (!g) return Err("Group not found");
     if (g->owner != selfId()) return Err("Only the group owner can remove members");
     if (accountId == selfId()) return Err("Use Leave to leave your own group");
-    if (!isOnline()) return Err("Connect to Globed first");
+    if (auto reason = offlineReason()) return Err(*reason);
 
     std::erase_if(g->members, [&](auto& m) { return m.accountId == accountId; });
     // the removed player also gets the sync, sees they're not in it, and drops the group
@@ -169,7 +182,7 @@ Result<> GroupManager::sendMessage(uint64_t groupId, std::string text, std::opti
         level->name = sanitize(level->name, MAX_LEVEL_NAME);
         level->creator = sanitize(level->creator, MAX_USERNAME);
     }
-    if (!isOnline()) return Err("Connect to Globed first");
+    if (auto reason = offlineReason()) return Err(*reason);
 
     auto now = std::chrono::steady_clock::now();
     if (now - m_lastSend < SEND_COOLDOWN) return Err("Slow down!");

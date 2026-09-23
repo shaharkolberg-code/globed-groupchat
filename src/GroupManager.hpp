@@ -40,6 +40,8 @@ public:
     static int selfId();
     static std::string selfName();
     static bool isOnline();
+    /// Why group chats can't be used right now, or nullopt if they can.
+    static std::optional<std::string> offlineReason();
 
     std::vector<Group*> groups();
     Group* find(uint64_t id);
