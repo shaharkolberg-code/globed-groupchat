@@ -1,0 +1,46 @@
+{
+	"geode": "5.10.1",
+	"gd": {
+		"win": "2.2081",
+		"android": "2.2081",
+		"mac": "2.2081",
+		"ios": "2.2081"
+	},
+	"id": "shahar.globed-groupchat",
+	"name": "Globed Group Chats",
+	"version": "v1.0.0",
+	"developer": "shahar",
+	"description": "Group chats with emojis and level sharing, over Globed's servers",
+	"tags": ["online", "social"],
+	"dependencies": {
+		"dankmeme.globed2": ">=2.2.0",
+		"geode.node-ids": ">=1.20.0"
+	},
+	"resources": {
+		"spritesheets": {
+			"emojis": ["resources/emoji/*.png"]
+		}
+	},
+	"settings": {
+		"auto-accept-invites": {
+			"type": "bool",
+			"name": "Auto-accept Invites",
+			"description": "Join group chats automatically when someone adds you, instead of showing a pending invite.",
+			"default": false
+		},
+		"message-notifications": {
+			"type": "bool",
+			"name": "Message Notifications",
+			"description": "Show a notification when a group message arrives and that chat isn't open.",
+			"default": true
+		},
+		"history-size": {
+			"type": "int",
+			"name": "Saved Messages per Group",
+			"description": "How many messages to keep locally for each group chat.",
+			"default": 100,
+			"min": 10,
+			"max": 500
+		}
+	}
+}
